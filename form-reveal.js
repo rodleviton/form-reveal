@@ -91,7 +91,6 @@
                 updateCurrentState: function(elem){
 
                     var that = elem;
-                    console.log(that);
 
                     $('select', that).each(function(){
                         if($(this).attr('disabled')) {
@@ -109,6 +108,9 @@
                             $(this).data('disabled', false);
                         }
                     });
+                    
+                    //To Do
+                    // Add checkbox/radio disable mechanism
 
                 },
                 setEventListener: function() {
@@ -167,18 +169,21 @@
                 show: function() {
                     $(targetArr).each(function(){
 
-                        // Added to enable Fluent Validation to function correctly
+                        // Disables hidden fields to improve JavaScript validation support
                         $('select', this).each(function(){
-                            if($(this).data('disabled') === true) {
+                            if($(this).data('disabled') === false) {
                                 $(this).removeAttr('disabled');
                             }
                         });
                     
                         $('input', this).each(function(){
-                            if($(this).data('disabled') === true) {
+                            if($(this).data('disabled') === false) {
                                 $(this).removeAttr('disabled');
                             }
                         });
+                        
+                        //To Do
+                        // Add checkbox/radio disable mechanism
                         
                         $(this).stop().animate({
                             'height': $(this).data('height')
@@ -206,18 +211,21 @@
                             $(this).css({'padding': 0});
                         });
 
-                        // Added to enable Fluent Validation to function correctly      
+                        // Disables hidden fields to improve JavaScript validation support 
                         $('select', this).each(function(){
-                            if($(this).data('disabled') === true) {
+                            if($(this).data('disabled') === false) {
                                 $(this).attr('disabled', 'disabled');
                             }
                         });
                     
                         $('input', this).each(function(){
-                            if($(this).data('disabled') === true) {
+                            if($(this).data('disabled') === false) {
                                 $(this).attr('disabled', 'disabled');
                             }
                         });
+                        
+                        //To Do
+                        // Add checkbox/radio disable mechanism
 
                     });
                 }
