@@ -3,7 +3,7 @@
 ;(function ( $, window, undefined ) {
     "use strict"; //jshint
 
-    $.fn.formReveal = function (options) {
+    $.fn.formReveal = function () {
         
         return $(this).each(function () {
 
@@ -25,7 +25,7 @@
                 getTarget: function() {
                     // Retrieves target to reveal by id
                     target = $(selector).attr('data-reveal-target');
-                    return(target)
+                    return(target);
                 },
                 createTargetArray: function(target) {
                     $(target).each(function(){
@@ -169,13 +169,13 @@
 
                         // Added to enable Fluent Validation to function correctly
                         $('select', this).each(function(){
-                            if(!$(this).data('disabled') === true) {
+                            if($(this).data('disabled') === true) {
                                 $(this).removeAttr('disabled');
                             }
                         });
                     
                         $('input', this).each(function(){
-                            if(!$(this).data('disabled') === true) {
+                            if($(this).data('disabled') === true) {
                                 $(this).removeAttr('disabled');
                             }
                         });
@@ -208,20 +208,20 @@
 
                         // Added to enable Fluent Validation to function correctly      
                         $('select', this).each(function(){
-                            if(!$(this).data('disabled') === true) {
+                            if($(this).data('disabled') === true) {
                                 $(this).attr('disabled', 'disabled');
                             }
                         });
                     
                         $('input', this).each(function(){
-                            if(!$(this).data('disabled') === true) {
+                            if($(this).data('disabled') === true) {
                                 $(this).attr('disabled', 'disabled');
                             }
                         });
 
                     });
                 }
-            }
+            };
             FormReveal.init(); 
         });
     };
