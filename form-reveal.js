@@ -16,7 +16,7 @@
             var FormReveal = {
                 init: function() {
                     targetArr = FormReveal.getTargetArray(FormReveal.getTarget());
-                    type = FormReveal.setTriggerType();
+                    type = FormReveal.getTriggerType();
                     FormReveal.setTargetAttributes();    
                     FormReveal.setState();
                     FormReveal.setEventListener();
@@ -38,10 +38,14 @@
                         $(this).data('paddingTop', $(this).css('paddingTop'));
                         $(this).data('paddingBottom', $(this).css('paddingBottom'));
                         $(this).data('height', $(this).height());
+                        //TODO
+                        //Record margin as data value
                         $(this).css({ // Sets initial CSS styles
                             'height': 0,
                             'overflow': 'hidden',
                             'opacity': 0
+                            //TODO
+                            //Remove margin
                         });
                     });
                 },
@@ -65,7 +69,7 @@
                         _type = 'div';
                     }
                     
-                    return type;
+                    return _type;
                 },
                 setState: function() {
 
@@ -188,15 +192,17 @@
                         });
 
                         $(this).stop().animate({
-                            'height': $(this).data('height')
+                            'height': $(this).data('height'),
+                            'paddingTop': $(this).data('paddingTop'),
+                            'paddingBottom': $(this).data('paddingTop')
                         }, 300, function() {
                             $(this).stop().animate({
                                 'opacity': 1
                             });
                             $(this).css({
-                                'height': 'auto',
-                                'paddingTop': $(this).data('paddingTop'),
-                                'paddingBottom': $(this).data('paddingTop')
+                                'height': 'auto'
+                                //TODO
+                                //Retrieve margin from data value
                             });
                         });
                     });
@@ -215,7 +221,8 @@
                                 'height': 0
                             });
                             $(this).css({
-                                'padding': 0
+                                'paddingTop': 0,
+                                'paddingBottom': 0
                             });
                         });
 
@@ -237,6 +244,9 @@
             };
             FormReveal.init();
         });
+        
+        //TODO
+        //Pass in animation speed options
     };
 }(jQuery, window));
 
