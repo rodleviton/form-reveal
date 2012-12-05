@@ -1,9 +1,9 @@
 // ------------------------------------------------ FORM-REVEAL PLUGIN  -------------------------------------------------- //
 
-(function($, window, undefined) {
+(function($) {
     "use strict"; //jshint
 
-    $.fn.formReveal = function() {
+    $.fn.formReveal = function(options) {
 
         return $(this).each(function() {
 
@@ -54,6 +54,7 @@
                 },
                 getTriggerType: function() {
                     var _type = null;
+
                     // Determines trigger type
                     if ($(selector).attr('type') === 'radio') { // Radio buttons
                         _type = 'radio';
@@ -96,9 +97,9 @@
                 },
                 updateState: function(elem) {
 
-                    var that = elem;
+                    var _elem = elem;
 
-                    $('select', that).each(function() {
+                    $('select', _elem).each(function() {
                         if ($(this).attr('disabled')) {
                             $(this).data('disabled', true);
                         }
@@ -107,7 +108,7 @@
                         }
                     });
 
-                    $('input', that).each(function() {
+                    $('input', _elem).each(function() {
                         if ($(this).attr('disabled')) {
                             $(this).data('disabled', true);
                         }
@@ -173,6 +174,33 @@
                             else {
                                 $(selector).data('toggle', 'on');
                                 FormReveal.show();
+                            }
+
+                            //Additional functionality to handle group of div
+                            if ($(selector).attr('data-reveal-group')) {
+                                var _group = $(selector).attr('data-reveal-group');
+                                $("[data-reveal-group='" + _group + "']").each(function() {
+                                    if ((this !== selector)) {
+                                        var _target = $(this).attr('data-reveal-target');
+                                        $(this).data('toggle', 'off');
+                                        $(_target).stop().animate({
+                                            'opacity': 0
+                                        }, 300, function() {
+                                            $(_target).stop().animate({
+                                                'height': 0
+                                            });
+                                            $(_target).css({
+                                                'paddingTop': 0,
+                                                'paddingBottom': 0,
+                                                'marginTop': 0,
+                                                'marginBottom': 0
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                            else {
+                                //alert('Is not part of a group');
                             }
                             return false; // Useful to stop buttons and links trigger a default action
 
@@ -254,9 +282,10 @@
 
         //TODO
         //Pass in animation speed options
+        //Add data attribute to group divs
 
     };
-}(jQuery, window));
+})(jQuery);
 
 // Self Initialisation of plugin
 $(function() {
