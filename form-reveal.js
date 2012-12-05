@@ -1,4 +1,5 @@
 // ------------------------------------------------ FORM-REVEAL PLUGIN  -------------------------------------------------- //
+
 (function($, window, undefined) {
     "use strict"; //jshint
 
@@ -117,8 +118,11 @@
 
                 },
                 setEventListener: function() {
+
                     // Set up trigger listener based on selector type
-                    if (type === 'radio') {
+                    switch (type) {
+                    case 'radio':
+
                         group = $(selector).attr('name');
                         $('input[name="' + group + '"]').change(function() { // listener for radio button group
                             var state = $(selector).attr('checked');
@@ -130,9 +134,10 @@
                             }
                         });
                         $('input[name="' + group + '"]').trigger('change'); // Sets initial state
-                    }
 
-                    if (type === 'checkbox') {
+                        break;
+
+                    case 'checkbox':
                         $(selector).change(function() {
                             if ($(selector).is(':checked')) {
                                 FormReveal.show();
@@ -142,9 +147,9 @@
                             }
                         });
                         $(selector).trigger('change'); // Sets initial state
-                    }
+                        break;
 
-                    if (type === 'select') {
+                    case 'select':
                         group = $(selector).parents('select');
                         $(group).change(function() { // listener for select list option
                             var val = $(group).val();
@@ -156,9 +161,9 @@
                             }
                         });
                         $(group).trigger('change'); // Sets initial state
-                    }
+                        break;
 
-                    if (type === 'div') {
+                    case 'div':
                         $(selector).click(function() {
                             var _state = $(selector).data('toggle');
                             if (_state === 'on') {
@@ -170,13 +175,15 @@
                                 FormReveal.show();
                             }
                             return false; // Useful to stop buttons and links trigger a default action
+
                         });
+                        break;
                     }
                 },
                 show: function() {
                     $(targetArr).each(function() {
 
-                        // Disables hidden fields to improve JavaScript validation support
+                        // Better JavaScript validation support
                         $('select', this).each(function() {
                             if ($(this).data('disabled') === false) {
                                 $(this).removeAttr('disabled');
@@ -226,7 +233,7 @@
                             });
                         });
 
-                        // Disables hidden fields to improve JavaScript validation support 
+                        // Better JavaScript validation support
                         $('select', this).each(function() {
                             if ($(this).data('disabled') === false) {
                                 $(this).attr('disabled', 'disabled');
@@ -247,6 +254,7 @@
 
         //TODO
         //Pass in animation speed options
+
     };
 }(jQuery, window));
 
