@@ -44,7 +44,11 @@
                         $(this).css({ // Sets initial CSS styles
                             'height': 0,
                             'overflow': 'hidden',
-                            'opacity': 0
+                            'opacity': 0,
+                            'paddingTop': 0,
+                            'paddingBottom': 0,
+                            'marginTop': 0,
+                            'marginBottom': 0
                         });
                     });
                 },
@@ -185,10 +189,10 @@
                                         $(this).data('toggle', 'off');
                                         $(_target).stop().animate({
                                             'opacity': 0
-                                        }, 300, function() {
+                                        }, 200, function() {
                                             $(_target).stop().animate({
                                                 'height': 0
-                                            });
+                                            }, 300);
                                             $(_target).css({
                                                 'paddingTop': 0,
                                                 'paddingBottom': 0,
@@ -199,9 +203,7 @@
                                     }
                                 });
                             }
-                            else {
-                                //alert('Is not part of a group');
-                            }
+                            
                             return false; // Useful to stop buttons and links trigger a default action
 
                         });
@@ -224,7 +226,7 @@
                             }
                         });
 
-                        $(this).stop().animate({
+                        $(this).stop().delay(500).animate({
                             'height': $(this).data('height'),
                             'paddingTop': $(this).data('paddingTop'),
                             'paddingBottom': $(this).data('paddingTop'),
@@ -233,7 +235,7 @@
                         }, 300, function() {
                             $(this).stop().animate({
                                 'opacity': 1
-                            });
+                            }, 200);
                             $(this).css({
                                 'height': 'auto'
                             });
@@ -249,10 +251,10 @@
 
                         $(this).stop().animate({
                             'opacity': 0
-                        }, 300, function() {
+                        }, 200, function() {
                             $(this).stop().animate({
                                 'height': 0
-                            });
+                            }, 300);
                             $(this).css({
                                 'paddingTop': 0,
                                 'paddingBottom': 0,
@@ -283,6 +285,7 @@
         //TODO
         //Pass in animation speed options
         //Add data attribute to group divs
+        //Add in callback
 
     };
 })(jQuery);
