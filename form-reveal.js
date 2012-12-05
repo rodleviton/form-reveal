@@ -16,7 +16,7 @@
                 init: function() {
                     targetArr = FormReveal.getTargetArray(FormReveal.getTarget());
                     type = FormReveal.getTriggerType();
-                    FormReveal.setTargetAttributes();    
+                    FormReveal.setTargetAttributes();
                     FormReveal.setState();
                     FormReveal.setEventListener();
                 },
@@ -29,7 +29,7 @@
                     $(target).each(function() {
                         targetArr.push(this);
                     });
-                    
+
                     return targetArr;
                 },
                 setTargetAttributes: function() {
@@ -66,7 +66,7 @@
                     else { // Everything else
                         _type = 'div';
                     }
-                    
+
                     return _type;
                 },
                 setState: function() {
@@ -244,7 +244,7 @@
             };
             FormReveal.init();
         });
-        
+
         //TODO
         //Pass in animation speed options
     };
