@@ -37,15 +37,14 @@
                     $(targetArr).each(function() {
                         $(this).data('paddingTop', $(this).css('paddingTop'));
                         $(this).data('paddingBottom', $(this).css('paddingBottom'));
+                        $(this).data('marginTop', $(this).css('marginTop'));
+                        $(this).data('marginBottom', $(this).css('marginBottom'));
                         $(this).data('height', $(this).height());
-                        //TODO
-                        //Record margin as data value
+
                         $(this).css({ // Sets initial CSS styles
                             'height': 0,
                             'overflow': 'hidden',
                             'opacity': 0
-                            //TODO
-                            //Remove margin
                         });
                     });
                 },
@@ -194,15 +193,15 @@
                         $(this).stop().animate({
                             'height': $(this).data('height'),
                             'paddingTop': $(this).data('paddingTop'),
-                            'paddingBottom': $(this).data('paddingTop')
+                            'paddingBottom': $(this).data('paddingTop'),
+                            'marginTop': $(this).data('marginTop'),
+                            'marginBottom': $(this).data('marginTop')
                         }, 300, function() {
                             $(this).stop().animate({
                                 'opacity': 1
                             });
                             $(this).css({
                                 'height': 'auto'
-                                //TODO
-                                //Retrieve margin from data value
                             });
                         });
                     });
@@ -222,7 +221,9 @@
                             });
                             $(this).css({
                                 'paddingTop': 0,
-                                'paddingBottom': 0
+                                'paddingBottom': 0,
+                                'marginTop': 0,
+                                'marginBottom': 0
                             });
                         });
 
