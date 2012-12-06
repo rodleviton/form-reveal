@@ -1,6 +1,7 @@
 /*!
  * jQuery form-reveal plugin
  * Original author: @rodneyleviton
+ * Author website: rodleviton.com
  * Licensed under the MIT license
  */
 
