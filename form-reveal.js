@@ -10,7 +10,7 @@
     // Create the defaults
     var formReveal = 'formReveal',
         defaults = {
-            speed: 300
+            speed: 500
         };
 
     // Plugin constructor
