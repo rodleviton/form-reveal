@@ -26,6 +26,7 @@
 
         var element = this.element;
         var target;
+        
         var targetArr = [];
         
         var type;
@@ -33,7 +34,7 @@
         var group;
 
         function getTarget() {
-            // Retrieves target to reveal by id/class
+            // Retrievess target to reveal by id/class
             target = $(element).data("reveal-target");
             return (target);
         }
