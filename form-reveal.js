@@ -28,6 +28,7 @@
         var target;
         var targetArr = [];
         var type;
+        
         var group;
 
         function getTarget() {
