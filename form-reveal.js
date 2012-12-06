@@ -27,6 +27,7 @@
         var element = this.element;
         var target;
         var targetArr = [];
+        
         var type;
         
         var group;
