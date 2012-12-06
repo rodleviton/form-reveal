@@ -6,3 +6,4 @@ Plugin designed to assist the revealing of content based on form inputs, select 
 TODO:
 Add examples.
 Add demo link.
+Add options.
