@@ -23,7 +23,7 @@
                 },
                 getTarget: function() {
                     // Retrieves target to reveal by id/class
-                    target = $(selector).attr('data-reveal-target');
+                    target = $(selector).data("reveal-target");
                     return (target);
                 },
                 getTargetArray: function(target) {
@@ -181,11 +181,11 @@
                             }
 
                             //Additional functionality to handle group of div
-                            if ($(selector).attr('data-reveal-group')) {
-                                var _group = $(selector).attr('data-reveal-group');
+                            if ($(selector).data("reveal-group")) {
+                                var _group = $(selector).data("reveal-group");
                                 $("[data-reveal-group='" + _group + "']").each(function() {
                                     if ((this !== selector)) {
-                                        var _target = $(this).attr('data-reveal-target');
+                                        var _target = $(this).data("reveal-target");
                                         $(this).data('toggle', 'off');
                                         $(_target).stop().animate({
                                             'opacity': 0
@@ -226,7 +226,7 @@
                             }
                         });
 
-                        $(this).stop().delay(500).animate({
+                        $(this).stop().delay(300).animate({
                             'height': $(this).data('height'),
                             'paddingTop': $(this).data('paddingTop'),
                             'paddingBottom': $(this).data('paddingTop'),
