@@ -7,3 +7,4 @@ TODO:
 Add examples.
 Add demo link.
 Add options.
+Add method explanations.
