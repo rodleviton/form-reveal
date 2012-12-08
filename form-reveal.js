@@ -1,7 +1,7 @@
 /*!
  * jQuery form-reveal plugin
  * Original author: @rodneyleviton
- * Author website: rodleviton.com
+ * Author Website: rodleviton.com
  * Licensed under the MIT license
  */
 
@@ -10,7 +10,7 @@
     // Create the defaults
     var formReveal = 'formReveal',
         defaults = {
-            speed: 500
+            speed: 600
         };
 
     // Plugin constructor
@@ -25,16 +25,16 @@
     Plugin.prototype.init = function() {
 
         var element = this.element;
+        var defaults = this._defaults;
         var target;
-        
         var targetArr = [];
-        
         var type;
-        
         var group;
-
+        var onShowCallBack;
+        var onHideCallBack;
+        
         function getTarget() {
-            // Retrievess target to reveal by id/class
+            // Retrieves target to reveal by id/class
             target = $(element).data("reveal-target");
             return (target);
         }
@@ -45,6 +45,22 @@
             });
 
             return targetArr;
+        }
+        
+        function getOnShowCallBack() {
+            var _onShowCallBack;
+            if($(element).data('reveal-onshow')) {
+                _onShowCallBack = $(element).data('reveal-onshow');
+            }
+            return _onShowCallBack;
+        }
+        
+        function getOnHideCallBack() {
+            var _onHideCallBack;
+            if($(element).data('reveal-onshow')) {
+                _onHideCallBack = $(element).data('reveal-onhide');
+            }
+            return _onHideCallBack;
         }
 
         function setTargetAttributes() {
@@ -189,11 +205,6 @@
 
             case 'div':
                 $(element).click(function() {
-
-                    function goodbye() {
-                        alert('Hello');
-                    }
-
                     var _state = $(element).data('toggle');
                     if (_state === 'on') {
                         $(element).data('toggle', 'off');
@@ -203,7 +214,7 @@
                         $(element).data('toggle', 'on');
                         show();
                     }
-
+                    
                     //Additional functionality to handle group of div
                     if ($(element).data("reveal-group")) {
                         var _group = $(element).data("reveal-group");
@@ -236,8 +247,9 @@
         }
 
         function show() {
-            $(targetArr).each(function() {
 
+            $(targetArr).each(function() {
+                
                 // Better JavaScript validation support
                 $('select', this).each(function() {
                     if ($(this).data('disabled') === false) {
@@ -264,12 +276,21 @@
                     $(this).css({
                         'height': 'auto'
                     });
+                    
+                    
                 });
             });
+            
+            //onShow
+            if (onShowCallBack !== undefined) {
+                var _timer = setInterval(function(){ onShowCallback(_timer);}, defaults.speed);
+            }
         }
 
         function hide() {
+            
             $(targetArr).each(function() {
+                
 
                 if ($(this).css('opacity') > 0) { // Checks for current active element and updates input/select states
                     updateState(this);
@@ -288,13 +309,6 @@
                         'marginBottom': 0
                     });
 
-                    //Callback onHide
-
-                    if ($(this).data('reveal-onhide')) {
-                        var _callback = $(this).data('reveal-onhide');
-                        console.log(_callback);
-                        _callback.call(this);
-                    }
                 });
 
                 // Better JavaScript validation support
@@ -311,11 +325,29 @@
                 });
 
             });
+            
+            //onHide
+            if (onHideCallBack !== undefined) {
+                var _timer = setInterval(function(){ onHideCallback(_timer);}, defaults.speed);
+                
+            }
+        }
+        
+        function onShowCallback(timer) {
+            window[onShowCallBack].call(element);
+            clearTimeout(timer);
+        }
+        
+        function onHideCallback(timer) {
+            window[onHideCallBack].call(element);
+            clearTimeout(timer);
         }
 
         // Setup
         targetArr = getTargetArray(getTarget());
         type = getTriggerType();
+        onShowCallBack = getOnShowCallBack();
+        onHideCallBack = getOnHideCallBack();
         setTargetAttributes();
         setState();
         setEventListener();
@@ -334,11 +366,3 @@
     };
 
 })(jQuery, window, document);
-
-// Self Initialisation of plugin
-$(function() {
-    "use strict"; //jshint
-    if ($('[data-reveal-target]').length > 0) {
-        $('[data-reveal-target]').formReveal();
-    }
-});
