@@ -5,7 +5,8 @@
  * Licensed under the MIT license
  */
 
-;(function($, window, document, undefined) {
+;
+(function($, window, document, undefined) {
 
     // Create the defaults
     var formReveal = 'formReveal',
@@ -32,7 +33,7 @@
         var group;
         var onShowCallBack;
         var onHideCallBack;
-        
+
         function getTarget() {
             // Retrieves target to reveal by id/class
             target = $(element).data("reveal-target");
@@ -43,21 +44,20 @@
             $(target).each(function() {
                 targetArr.push(this);
             });
-
             return targetArr;
         }
-        
+
         function getOnShowCallBack() {
             var _onShowCallBack;
-            if($(element).data('reveal-onshow')) {
+            if ($(element).data('reveal-onshow')) {
                 _onShowCallBack = $(element).data('reveal-onshow');
             }
             return _onShowCallBack;
         }
-        
+
         function getOnHideCallBack() {
             var _onHideCallBack;
-            if($(element).data('reveal-onshow')) {
+            if ($(element).data('reveal-onshow')) {
                 _onHideCallBack = $(element).data('reveal-onhide');
             }
             return _onHideCallBack;
@@ -65,11 +65,14 @@
 
         function setTargetAttributes() {
             $(targetArr).each(function() {
-                $(this).data('paddingTop', $(this).css('paddingTop'));
-                $(this).data('paddingBottom', $(this).css('paddingBottom'));
-                $(this).data('marginTop', $(this).css('marginTop'));
-                $(this).data('marginBottom', $(this).css('marginBottom'));
-                $(this).data('height', $(this).height());
+                if ($(this).data('initialised') !== true) { //Prevents element values from being overidden by duplicate data-reveal-target selectors
+                    $(this).data('paddingTop', $(this).css('paddingTop'));
+                    $(this).data('paddingBottom', $(this).css('paddingBottom'));
+                    $(this).data('marginTop', $(this).css('marginTop'));
+                    $(this).data('marginBottom', $(this).css('marginBottom'));
+                    $(this).data('height', $(this).height());
+                    $(this).data('initialised', true);
+                }
 
                 $(this).css({ // Sets initial CSS styles
                     'height': 0,
@@ -81,11 +84,6 @@
                     'marginBottom': 0
                 });
             });
-        }
-
-        function getOuterHTML(element) {
-            var outerHTML = $(element).clone().wrap('<p>').parent().html();
-            return outerHTML;
         }
 
         function getTriggerType() {
@@ -122,14 +120,17 @@
             });
 
             $(targetArr).each(function() {
-                $('input', this).each(function() {
-                    if ($(this).attr('disabled')) {
-                        $(this).data('disabled', true);
-                    }
-                    else {
-                        $(this).data('disabled', false);
-                    }
-                });
+                if ($(this).data('initialised') !== true) {
+                    $('input', this).each(function() {
+                       
+                        if ($(this).attr('disabled')) {
+                            $(this).data('disabled', true);
+                        }
+                        else {
+                            $(this).data('disabled', false);
+                        }
+                    });
+                }
             });
         }
 
@@ -155,6 +156,16 @@
                 }
             });
 
+        }
+
+        function getCheckboxStates() {
+            var checked = false;
+            $($("[data-reveal-target='" + $(element).data('reveal-target') + "']")).each(function() {
+                if ($(this).is(':checked')) {
+                    checked = true;
+                }
+            });
+            return checked;
         }
 
         function setEventListener() {
@@ -183,7 +194,11 @@
                         show();
                     }
                     else {
-                        hide();
+                        // Checks if any checkboxes with duplicate target value exist and are checked
+                        if (getCheckboxStates() === false) {
+                            hide();
+                        }
+
                     }
                 });
                 $(element).trigger('change'); // Sets initial state
@@ -214,8 +229,8 @@
                         $(element).data('toggle', 'on');
                         show();
                     }
-                    
-                    //Additional functionality to handle group of div
+
+                    //Additional functionality to handle group of divs
                     if ($(element).data("reveal-group")) {
                         var _group = $(element).data("reveal-group");
                         $("[data-reveal-group='" + _group + "']").each(function() {
@@ -249,7 +264,7 @@
         function show() {
 
             $(targetArr).each(function() {
-                
+
                 // Better JavaScript validation support
                 $('select', this).each(function() {
                     if ($(this).data('disabled') === false) {
@@ -276,21 +291,20 @@
                     $(this).css({
                         'height': 'auto'
                     });
-                    
-                    
                 });
             });
-            
+
             //onShow
             if (onShowCallBack !== undefined) {
-                var _timer = setInterval(function(){ onShowCallback(_timer);}, defaults.speed);
+                var _timer = setInterval(function() {
+                    onShowCallback(_timer);
+                }, defaults.speed);
             }
         }
 
         function hide() {
-            
+
             $(targetArr).each(function() {
-                
 
                 if ($(this).css('opacity') > 0) { // Checks for current active element and updates input/select states
                     updateState(this);
@@ -308,7 +322,6 @@
                         'marginTop': 0,
                         'marginBottom': 0
                     });
-
                 });
 
                 // Better JavaScript validation support
@@ -325,19 +338,21 @@
                 });
 
             });
-            
+
             //onHide
             if (onHideCallBack !== undefined) {
-                var _timer = setInterval(function(){ onHideCallback(_timer);}, defaults.speed);
-                
+                var _timer = setInterval(function() {
+                    onHideCallback(_timer);
+                }, defaults.speed);
+
             }
         }
-        
+
         function onShowCallback(timer) {
             window[onShowCallBack].call(element);
             clearTimeout(timer);
         }
-        
+
         function onHideCallback(timer) {
             window[onHideCallBack].call(element);
             clearTimeout(timer);
