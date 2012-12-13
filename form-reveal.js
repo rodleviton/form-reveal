@@ -36,7 +36,7 @@
 
         function getTarget() {
             // Retrieves target to reveal by id/class
-            target = $(element).data("reveal-target");
+            target = $(element).data("reveal-target").selector;
             return (target);
         }
 
@@ -63,16 +63,68 @@
             return _onHideCallBack;
         }
 
+        function checkGrouping(obj) {
+
+            //Additional functionality to handle group of divs
+            if ($(element).data("reveal-target").group) {
+                
+                // Grouped divs will not toggle
+                $(element).data('toggle', 'off');
+                // TODO
+                // Reset toggle on divs
+
+                $('[data-reveal-target]').each(function() {
+
+                    if ($(this).data("reveal-target").group === $(element).data('reveal-target').group) {
+
+                        var _type = getTriggerType(this);
+                        var _target = $(this).data("reveal-target").selector;
+
+                        if (_target !== $(element).data('reveal-target').selector) {
+                            if ((_target !== $(element).data("reveal-target").selector)) {
+                                $(_target).stop().animate({
+                                    'opacity': 0
+                                }, 200, function() {
+                                    $(_target).stop().animate({
+                                        'height': 0
+                                    }, 300);
+                                    $(_target).css({
+                                        'paddingTop': 0,
+                                        'paddingBottom': 0,
+                                        'marginTop': 0,
+                                        'marginBottom': 0
+                                    });
+                                });
+                            }
+
+                            switch (_type) {
+                            case 'radio':
+                                $(this).prop('checked', false);
+                                break;
+
+                            case 'checkbox':
+                                $(this).attr('checked', false);
+                                break;
+
+                            case 'select':
+                                $(this).attr('selected', false);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
         function setTargetAttributes() {
             $(targetArr).each(function() {
-                if ($(this).data('initialised') !== true) { //Prevents element values from being overidden by duplicate data-reveal-target selectors
-                    $(this).data('paddingTop', $(this).css('paddingTop'));
-                    $(this).data('paddingBottom', $(this).css('paddingBottom'));
-                    $(this).data('marginTop', $(this).css('marginTop'));
-                    $(this).data('marginBottom', $(this).css('marginBottom'));
-                    $(this).data('height', $(this).height());
-                    $(this).data('initialised', true);
-                }
+
+                //Prevents element values from being overidden by duplicate data-reveal-target selectors
+                $(this).data('paddingTop', ($(this).data('paddingTop') === undefined) ? $(this).css('paddingTop') : $(this).data('paddingTop'));
+                $(this).data('paddingBottom', ($(this).data('paddingBottom') === undefined) ? $(this).css('paddingBottom') : $(this).data('paddingBottom'));
+                $(this).data('marginTop', ($(this).data('marginTop') === undefined) ? $(this).css('marginTop') : $(this).data('marginTop'));
+                $(this).data('marginBottom', ($(this).data('marginBottom') === undefined) ? $(this).css('marginBottom') : $(this).data('marginBottom'));
+                $(this).data('height', ($(this).data('height') === undefined) ? $(this).height() : $(this).data('height'));
 
                 $(this).css({ // Sets initial CSS styles
                     'height': 0,
@@ -83,20 +135,21 @@
                     'marginTop': 0,
                     'marginBottom': 0
                 });
+
             });
         }
 
-        function getTriggerType() {
+        function getTriggerType(elem) {
             var _type = null;
 
             // Determines trigger type
-            if ($(element).attr('type') === 'radio') { // Radio buttons
+            if ($(elem).attr('type') === 'radio') { // Radio buttons
                 _type = 'radio';
             }
-            else if ($(element).attr('type') === 'checkbox') { // Checkboxes
+            else if ($(elem).attr('type') === 'checkbox') { // Checkboxes
                 _type = 'checkbox';
             }
-            else if ($(element).parent()[0].nodeName === 'SELECT') { // Select Options
+            else if ($(elem).parent()[0].nodeName === 'SELECT') { // Select Options
                 _type = 'select';
             }
             else { // Everything else
@@ -122,7 +175,7 @@
             $(targetArr).each(function() {
                 if ($(this).data('initialised') !== true) {
                     $('input', this).each(function() {
-                       
+
                         if ($(this).attr('disabled')) {
                             $(this).data('disabled', true);
                         }
@@ -137,7 +190,6 @@
         function updateState(elem) {
 
             var _elem = elem;
-
             $('select', _elem).each(function() {
                 if ($(this).attr('disabled')) {
                     $(this).data('disabled', true);
@@ -156,26 +208,34 @@
                 }
             });
 
+            $(elem).data('initialised', true);
+
         }
 
         function getCheckboxStates() {
             var checked = false;
-            $($("[data-reveal-target='" + $(element).data('reveal-target') + "']")).each(function() {
-                if ($(this).is(':checked')) {
-                    checked = true;
+
+            $('[data-reveal-target]').each(function() {
+                if ($(this).data("reveal-target").selector === $(element).data('reveal-target').selector) {
+                    if ($(this).is(':checked')) {
+                        checked = true;
+                    }
                 }
             });
             return checked;
         }
 
         function setEventListener() {
-
             // Set up trigger listener based on this.element type
             switch (type) {
             case 'radio':
 
+
+
                 group = $(element).attr('name');
+
                 $('input[name="' + group + '"]').change(function() { // listener for radio button group
+
                     var state = $(element).attr('checked');
                     if (state === 'checked') {
                         show();
@@ -183,13 +243,21 @@
                     else {
                         hide();
                     }
+
+                    if ($(this).data('reveal-target')) {
+                        if ($(this).data('reveal-target').group) {
+                            if (this === element) {
+                                checkGrouping(this);
+                            }
+                        }
+                    }
                 });
                 $('input[name="' + group + '"]').trigger('change'); // Sets initial state
 
                 break;
-
             case 'checkbox':
                 $(element).change(function() {
+
                     if ($(element).is(':checked')) {
                         show();
                     }
@@ -198,12 +266,17 @@
                         if (getCheckboxStates() === false) {
                             hide();
                         }
-
+                    }
+                    if ($(this).data('reveal-target')) {
+                        if ($(this).data('reveal-target').group) {
+                            if (this === element) {
+                                checkGrouping(this);
+                            }
+                        }
                     }
                 });
                 $(element).trigger('change'); // Sets initial state
                 break;
-
             case 'select':
                 group = $(element).parents('select');
                 $(group).change(function() { // listener for select list option
@@ -214,10 +287,14 @@
                     else {
                         hide();
                     }
+
+                    if ($("option:selected", this)[0] === element) {
+                        checkGrouping($("option:selected", this)[0]);
+                    }
+
                 });
                 $(group).trigger('change'); // Sets initial state
                 break;
-
             case 'div':
                 $(element).click(function() {
                     var _state = $(element).data('toggle');
@@ -229,31 +306,11 @@
                         $(element).data('toggle', 'on');
                         show();
                     }
-
-                    //Additional functionality to handle group of divs
-                    if ($(element).data("reveal-group")) {
-                        var _group = $(element).data("reveal-group");
-                        $("[data-reveal-group='" + _group + "']").each(function() {
-                            if ((this !== element)) {
-                                var _target = $(this).data("reveal-target");
-                                $(this).data('toggle', 'off');
-                                $(_target).stop().animate({
-                                    'opacity': 0
-                                }, 200, function() {
-                                    $(_target).stop().animate({
-                                        'height': 0
-                                    }, 300);
-                                    $(_target).css({
-                                        'paddingTop': 0,
-                                        'paddingBottom': 0,
-                                        'marginTop': 0,
-                                        'marginBottom': 0
-                                    });
-                                });
-                            }
-                        });
+                    if ($(this).data('reveal-target')) {
+                        if ($(this).data('reveal-target').group) {
+                            checkGrouping(this);
+                        }
                     }
-
                     return false; // Useful to stop buttons and links trigger a default action
 
                 });
@@ -292,6 +349,7 @@
                         'height': 'auto'
                     });
                 });
+
             });
 
             //onShow
@@ -306,7 +364,7 @@
 
             $(targetArr).each(function() {
 
-                if ($(this).css('opacity') > 0) { // Checks for current active element and updates input/select states
+                if ($(this).data('initialised') !== true) { // Checks for current active element and updates input/select states
                     updateState(this);
                 }
 
@@ -326,17 +384,12 @@
 
                 // Better JavaScript validation support
                 $('select', this).each(function() {
-                    if ($(this).data('disabled') === false) {
-                        $(this).attr('disabled', 'disabled');
-                    }
+                    $(this).attr('disabled', 'disabled');
                 });
 
                 $('input', this).each(function() {
-                    if ($(this).data('disabled') === false) {
-                        $(this).attr('disabled', 'disabled');
-                    }
+                    $(this).attr('disabled', 'disabled');
                 });
-
             });
 
             //onHide
@@ -344,8 +397,8 @@
                 var _timer = setInterval(function() {
                     onHideCallback(_timer);
                 }, defaults.speed);
-
             }
+
         }
 
         function onShowCallback(timer) {
@@ -360,13 +413,12 @@
 
         // Setup
         targetArr = getTargetArray(getTarget());
-        type = getTriggerType();
+        type = getTriggerType(element);
         onShowCallBack = getOnShowCallBack();
         onHideCallBack = getOnHideCallBack();
         setTargetAttributes();
         setState();
         setEventListener();
-
     };
 
     // A really lightweight plugin wrapper around the constructor, 
