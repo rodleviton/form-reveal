@@ -1,18 +1,12 @@
-/*!
- * jQuery form-reveal plugin
- * Original author: @rodneyleviton
- * Author Website: rodleviton.com
- * Licensed under the MIT license
- */
-
-;
-(function($, window, document, undefined) {
+;(function($, window, document, undefined) {
 
     // Create the defaults
     var formReveal = 'formReveal',
         defaults = {
             speed: 600
         };
+    
+    var initialTriggers = [];
 
     // Plugin constructor
     function Plugin(element, options) {
@@ -30,14 +24,14 @@
         var target;
         var targetArr = [];
         var type;
-        var group;
-        var onShowCallBack;
-        var onHideCallBack;
+        var group;        
 
-        function getTarget() {
+        function getSelector(el) {
+            el = (el) ? el : element;
             // Retrieves target to reveal by id/class
-            target = $(element).data("reveal-target").selector;
-            return (target);
+            target = ( typeof $(el).data("reveal-target") == "object" ) ? $(el).data("reveal-target").selector : $(el).data("reveal-target");
+                        
+            return target;
         }
 
         function getTargetArray(target) {
@@ -46,58 +40,57 @@
             });
             return targetArr;
         }
-
-        function getOnShowCallBack() {
-            var _onShowCallBack;
-            if ($(element).data('reveal-onshow')) {
-                _onShowCallBack = $(element).data('reveal-onshow');
-            }
-            return _onShowCallBack;
-        }
-
-        function getOnHideCallBack() {
-            var _onHideCallBack;
-            if ($(element).data('reveal-onshow')) {
-                _onHideCallBack = $(element).data('reveal-onhide');
-            }
-            return _onHideCallBack;
-        }
-
+        
         function checkGrouping(obj) {
-
+            
             //Additional functionality to handle group of divs
-            if ($(element).data("reveal-target").group) {
+            $('[data-reveal-target]').each(function() {
                 
-                // Grouped divs will not toggle
-                $(element).data('toggle', 'off');
-                // TODO
-                // Reset toggle on divs
-
-                $('[data-reveal-target]').each(function() {
-
-                    if ($(this).data("reveal-target").group === $(element).data('reveal-target').group) {
+                if ($(this).data("reveal-target").group === $(element).data('reveal-target').group) {
+                                                
+                    if (this !== element) {
 
                         var _type = getTriggerType(this);
                         var _target = $(this).data("reveal-target").selector;
-
-                        if (_target !== $(element).data('reveal-target').selector) {
-                            if ((_target !== $(element).data("reveal-target").selector)) {
+                        var _elemSelector = $(element).data('reveal-target').selector;
+                        
+                        if((_target !== undefined) && (_target !== _elemSelector)) {
+                            
+                            //onHide
+                            $(this).trigger('formRevealHide');
+                            
+                            $(_target).stop().animate({
+                                'opacity': 0
+                            }, 200, function() {
                                 $(_target).stop().animate({
-                                    'opacity': 0
-                                }, 200, function() {
-                                    $(_target).stop().animate({
-                                        'height': 0
-                                    }, 300);
-                                    $(_target).css({
-                                        'paddingTop': 0,
-                                        'paddingBottom': 0,
-                                        'marginTop': 0,
-                                        'marginBottom': 0
-                                    });
+                                    'height': 0
+                                }, 300);
+                                $(_target).css({
+                                    'paddingTop': 0,
+                                    'paddingBottom': 0,
+                                    'marginTop': 0,
+                                    'marginBottom': 0
                                 });
-                            }
+                            });
+                            
+                            // Better JavaScript validation support
+                            $(_target + ' input').each(function() {
+                                if ($(this).data('disabled') === undefined) {
+                                    updateState(_target);
+                                }
+                                $(this).attr('disabled', 'disabled');
+                            });
+                            
+                           
+                            $(_target + ' select').each(function() {
+                                if ($(this).data('disabled') === undefined) {
+                                    updateState(_target);
+                                }
+                                $(this).attr('disabled', 'disabled');
+                            });
+                        }
 
-                            switch (_type) {
+                        switch (_type) {
                             case 'radio':
                                 $(this).prop('checked', false);
                                 break;
@@ -109,11 +102,15 @@
                             case 'select':
                                 $(this).attr('selected', false);
                                 break;
-                            }
+                                
+                            case 'div':
+                                $(this).data('toggle', 'off');
+                                break;
                         }
                     }
-                });
-            }
+                }
+            });
+
         }
 
         function setTargetAttributes() {
@@ -135,6 +132,8 @@
                     'marginTop': 0,
                     'marginBottom': 0
                 });
+                
+                updateState(this);
 
             });
         }
@@ -159,37 +158,8 @@
             return _type;
         }
 
-        function setState() {
-
-            $(targetArr).each(function() {
-                $('select', this).each(function() {
-                    if ($(this).attr('disabled')) {
-                        $(this).data('disabled', true);
-                    }
-                    else {
-                        $(this).data('disabled', false);
-                    }
-                });
-            });
-
-            $(targetArr).each(function() {
-                if ($(this).data('initialised') !== true) {
-                    $('input', this).each(function() {
-
-                        if ($(this).attr('disabled')) {
-                            $(this).data('disabled', true);
-                        }
-                        else {
-                            $(this).data('disabled', false);
-                        }
-                    });
-                }
-            });
-        }
-
         function updateState(elem) {
-
-            var _elem = elem;
+            var _elem = $(elem);
             $('select', _elem).each(function() {
                 if ($(this).attr('disabled')) {
                     $(this).data('disabled', true);
@@ -209,73 +179,84 @@
             });
 
             $(elem).data('initialised', true);
-
         }
 
-        function getCheckboxStates() {
-            var checked = false;
-
+        function findMatchingSelectors() {
+            var match = false;
             $('[data-reveal-target]').each(function() {
-                if ($(this).data("reveal-target").selector === $(element).data('reveal-target').selector) {
-                    if ($(this).is(':checked')) {
-                        checked = true;
+                //( typeof $(element).data("reveal-target") == "object" ) ? $(element).data("reveal-target").selector : $(element).data("reveal-target")
+                if (getSelector(this) == getSelector(element)) {
+                    if( $(this).is(':checked') || $(this).is(':selected') || ($(this).data('toggle') == 'on') ) {
+                        match = true;
                     }
                 }
             });
-            return checked;
+            return match;
         }
 
         function setEventListener() {
+                       
             // Set up trigger listener based on this.element type
             switch (type) {
             case 'radio':
 
-
-
-                group = $(element).attr('name');
+                group = $(element).attr('name');                
 
                 $('input[name="' + group + '"]').change(function() { // listener for radio button group
-
                     var state = $(element).attr('checked');
                     if (state === 'checked') {
+                        
                         show();
-                    }
-                    else {
-                        hide();
-                    }
 
-                    if ($(this).data('reveal-target')) {
-                        if ($(this).data('reveal-target').group) {
-                            if (this === element) {
-                                checkGrouping(this);
+                        //Checks grouping
+                        if ($(this).data('reveal-target')) {
+                            if ($(this).data('reveal-target').group) {
+                                if (this === element) {
+                                    checkGrouping(this);
+                                }
                             }
                         }
                     }
+                    else {
+                        // Checks if any checkboxes with duplicate target value exist and are checked
+                        if (findMatchingSelectors() === false) {
+                            hide();
+                        }
+                    }                    
+                                        
+                });                
+                initialTriggers.push( function() {
+                    $('input[name="' + group + '"]').trigger('change'); // Sets initial state
                 });
-                $('input[name="' + group + '"]').trigger('change'); // Sets initial state
-
                 break;
             case 'checkbox':
                 $(element).change(function() {
 
                     if ($(element).is(':checked')) {
+                       
                         show();
-                    }
-                    else {
-                        // Checks if any checkboxes with duplicate target value exist and are checked
-                        if (getCheckboxStates() === false) {
-                            hide();
-                        }
-                    }
-                    if ($(this).data('reveal-target')) {
-                        if ($(this).data('reveal-target').group) {
-                            if (this === element) {
-                                checkGrouping(this);
+                        
+                        //Check if element belongs to group
+                        if ($(this).data('reveal-target')) {
+                            if ($(this).data('reveal-target').group) {
+                                if (this === element) {
+                                    checkGrouping(this);
+                                }
                             }
                         }
                     }
+                    else {
+                        // Checks if any checkboxes with duplicate target value exist and are checked
+                        if (findMatchingSelectors() === false) {
+                            hide();
+                        }
+                    }
+                    
                 });
-                $(element).trigger('change'); // Sets initial state
+                initialTriggers.push( function() {
+                    $(element).trigger('change'); // Sets initial state
+                });
+            
                 break;
             case 'select':
                 group = $(element).parents('select');
@@ -283,43 +264,55 @@
                     var val = $(group).val();
                     if (val === $(element).val()) {
                         show();
+                        //Check if element belongs to group
+                        if ($(element).data('reveal-target')) {
+                            if ($(element).data('reveal-target').group) {
+                                checkGrouping(element);
+                            }
+                        }
                     }
                     else {
-                        hide();
+                        // Checks if any checkboxes with duplicate target value exist and are checked
+                        if (findMatchingSelectors() === false) {
+                            hide();
+                        }
                     }
-
-                    if ($("option:selected", this)[0] === element) {
-                        checkGrouping($("option:selected", this)[0]);
-                    }
-
                 });
-                $(group).trigger('change'); // Sets initial state
+                initialTriggers.push( function() {
+                     $(group).trigger('change'); // Sets initial state
+                });               
                 break;
             case 'div':
                 $(element).click(function() {
                     var _state = $(element).data('toggle');
                     if (_state === 'on') {
                         $(element).data('toggle', 'off');
-                        hide();
+                        // Checks if any checkboxes with duplicate target value exist and are checked
+                        if (findMatchingSelectors() === false) {
+                            hide();
+                        }                       
                     }
                     else {
                         $(element).data('toggle', 'on');
                         show();
-                    }
-                    if ($(this).data('reveal-target')) {
-                        if ($(this).data('reveal-target').group) {
-                            checkGrouping(this);
+                        
+                        //Check if element belongs to group
+                        if ($(this).data('reveal-target')) {
+                            if ($(this).data('reveal-target').group) {
+                                checkGrouping(this);
+                            }
                         }
                     }
+                                    
                     return false; // Useful to stop buttons and links trigger a default action
-
                 });
                 break;
             }
+
         }
 
         function show() {
-
+            
             $(targetArr).each(function() {
 
                 // Better JavaScript validation support
@@ -351,23 +344,13 @@
                 });
 
             });
-
+            
             //onShow
-            if (onShowCallBack !== undefined) {
-                var _timer = setInterval(function() {
-                    onShowCallback(_timer);
-                }, defaults.speed);
-            }
+            $(element).trigger('formRevealShow');
         }
 
         function hide() {
-
             $(targetArr).each(function() {
-
-                if ($(this).data('initialised') !== true) { // Checks for current active element and updates input/select states
-                    updateState(this);
-                }
-
                 $(this).stop().animate({
                     'opacity': 0
                 }, 200, function() {
@@ -383,53 +366,48 @@
                 });
 
                 // Better JavaScript validation support
-                $('select', this).each(function() {
+                var parentDiv = this;
+                $('select', parentDiv).each(function() {
+                    if ($(this).data('disabled') === undefined) {
+                        updateState(parentDiv);
+                    }
                     $(this).attr('disabled', 'disabled');
                 });
 
-                $('input', this).each(function() {
+                $('input', parentDiv).each(function() {
+                    if ($(this).data('disabled') === undefined) {
+                        updateState(parentDiv);
+                    }
                     $(this).attr('disabled', 'disabled');
                 });
+                
+                
             });
-
+            
             //onHide
-            if (onHideCallBack !== undefined) {
-                var _timer = setInterval(function() {
-                    onHideCallback(_timer);
-                }, defaults.speed);
-            }
-
-        }
-
-        function onShowCallback(timer) {
-            window[onShowCallBack].call(element);
-            clearTimeout(timer);
-        }
-
-        function onHideCallback(timer) {
-            window[onHideCallBack].call(element);
-            clearTimeout(timer);
+            $(element).trigger('formRevealHide');
         }
 
         // Setup
-        targetArr = getTargetArray(getTarget());
+        targetArr = getTargetArray(getSelector());
         type = getTriggerType(element);
-        onShowCallBack = getOnShowCallBack();
-        onHideCallBack = getOnHideCallBack();
         setTargetAttributes();
-        setState();
         setEventListener();
     };
 
     // A really lightweight plugin wrapper around the constructor, 
     // preventing against multiple instantiations
     $.fn[formReveal] = function(options) {
-        return this.each(function() {
+        var returnValue = this.each(function() {
             if (!$.data(this, 'plugin_' + formReveal)) {
                 $.data(this, 'plugin_' + formReveal,
                 new Plugin(this, options));
             }
         });
+        
+        $(initialTriggers).each(function(index, value) {
+            value();
+        });
+        return returnValue;
     };
-
 })(jQuery, window, document);
